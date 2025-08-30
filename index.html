@@ -2,7 +2,10 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Firebase Relay Control Dashboard</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta property="og:image" content="logo.png" />
+  <title>Relay Control Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -52,7 +55,69 @@
     .relay-card button:hover {
       opacity: 0.8;
     }
-    #allOffBtn, #logoutBtn {
+	
+	
+	/* Toggle Switch Container */
+	.switch {
+	  position: relative;
+	  display: inline-block;
+	  width: 60px;
+	  height: 34px;
+	  margin-top: 10px;
+	}
+
+	/* Hide default checkbox */
+	.switch input {
+	  opacity: 0;
+	  width: 0;
+	  height: 0;
+	}
+
+	/* Slider Track */
+	.slider {
+	  position: absolute;
+	  cursor: pointer;
+	  top: 0; left: 0;
+	  right: 0; bottom: 0;
+	  background-color: #ccc;
+	  transition: background-color 0.4s ease, box-shadow 0.3s ease;
+	  border-radius: 34px;
+	  box-shadow: inset 0 0 0 0 rgba(0,0,0,0.2);
+	}
+
+	/* Slider Knob */
+
+	transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	
+	.slider:before {
+	  position: absolute;
+	  content: "";
+	  height: 26px; width: 26px;
+	  left: 4px; bottom: 4px;
+	  background-color: white;
+	  transition: transform 0.4s ease, background-color 0.3s ease;
+	  border-radius: 50%;
+	  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+	}
+
+	/* Checked State */
+	input:checked + .slider {
+	  background-color: #4caf50;
+	  box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+	}
+
+	input:checked + .slider:before {
+	  transform: translateX(26px);
+	  background-color: #fff;
+	}
+	input:checked + .slider {
+	box-shadow: 0 0 8px #4caf50;
+	}
+
+	/* Toggle Switch Container */
+    
+	
+	#allOffBtn, #logoutBtn {
       max-width: 300px;
       width: 90%;
       padding: 12px 25px;
@@ -144,8 +209,11 @@
 </head>
 <body>
 
-  <h1>SRAutomation Relay Control Dashboard</h1>
-
+  <h1>SRAutomation Smart Switches Control Dashboard</h1>
+  <!-- Icon -->
+  <div class="fadeIn first">
+  <img src="logo.png" id="icon" alt="User Icon" />
+  </div>
   <!-- Login form -->
   <div id="loginForm">
     <input type="email" id="email" placeholder="Enter Email" required />
@@ -157,28 +225,41 @@
   <div id="dashboard">
     <div class="relay-container">
       <div class="relay-card">
-        <h2>Relay 1</h2>
-        <p>Status: <span id="status1">Loading...</span></p>
-        <button id="btn1">Toggle</button>
-      </div>
+		<h2>Relay 1</h2>
+		<label class="switch">
+		<input type="checkbox" id="chk1">
+		<span class="slider"></span>
+		</label>
+		<p>Status: <span id="status1">Loading...</span></p>
+	  </div>
+
+
+	  <div class="relay-card">
+		<h2>Relay 2</h2>
+		<label class="switch">
+		<input type="checkbox" id="chk2">
+		<span class="slider"></span>
+		</label>
+		<p>Status: <span id="status2">Loading...</span></p>
+	  </div>
 
       <div class="relay-card">
-        <h2>Relay 2</h2>
-        <p>Status: <span id="status2">Loading...</span></p>
-        <button id="btn2">Toggle</button>
-      </div>
+		<h2>Relay 3</h2>
+		<label class="switch">
+		<input type="checkbox" id="chk3">
+		<span class="slider"></span>
+		</label>
+		<p>Status: <span id="status3">Loading...</span></p>
+	  </div>
 
       <div class="relay-card">
-        <h2>Relay 3</h2>
-        <p>Status: <span id="status3">Loading...</span></p>
-        <button id="btn3">Toggle</button>
-      </div>
-
-      <div class="relay-card">
-        <h2>Relay 4</h2>
-        <p>Status: <span id="status4">Loading...</span></p>
-        <button id="btn4">Toggle</button>
-      </div>
+		<h2>Relay 4</h2>
+		<label class="switch">
+		<input type="checkbox" id="chk4">
+		<span class="slider"></span>
+		</label>
+		<p>Status: <span id="status4">Loading...</span></p>
+	  </div>
     </div>
 
     <button id="allOffBtn">All OFF</button>
@@ -234,39 +315,38 @@
     });
 
     function startRelayControl() {
-      const db = firebase.database();
+  const db = firebase.database();
 
-      const relays = [
-        { id: 1, path: "relay1" },
-        { id: 2, path: "relay2" },
-        { id: 3, path: "relay3" },
-        { id: 4, path: "relay4" },
-      ];
+  const relays = [
+    { id: 1, path: "relay1" },
+    { id: 2, path: "relay2" },
+    { id: 3, path: "relay3" },
+    { id: 4, path: "relay4" },
+  ];
 
-      relays.forEach(relay => {
-        const statusText = document.getElementById(`status${relay.id}`);
-        const toggleButton = document.getElementById(`btn${relay.id}`);
-        const relayRef = db.ref("/" + relay.path);
+  relays.forEach(relay => {
+    const statusText = document.getElementById(`status${relay.id}`);
+    const checkbox = document.getElementById(`chk${relay.id}`);
+    const relayRef = db.ref("/" + relay.path);
 
-        relayRef.on("value", (snapshot) => {
-          const state = snapshot.val();
-          statusText.innerText = state ? "ON" : "OFF";
-          toggleButton.style.backgroundColor = state ? "green" : "blue";
-        });
+    relayRef.on("value", (snapshot) => {
+      const state = snapshot.val();
+      statusText.innerText = state ? "ON" : "OFF";
+      checkbox.checked = state;
+    });
 
-        toggleButton.onclick = () => {
-          relayRef.get().then(snap => {
-            relayRef.set(!snap.val());
-          });
-        };
-      });
+    checkbox.onchange = () => {
+      relayRef.set(checkbox.checked);
+    };
+  });
 
-      document.getElementById("allOffBtn").onclick = () => {
-        relays.forEach(relay => {
-          db.ref("/" + relay.path).set(false);
-        });
-      };
-    }
+  document.getElementById("allOffBtn").onclick = () => {
+    relays.forEach(relay => {
+      db.ref("/" + relay.path).set(false);
+    });
+  };
+}
+
 
     document.getElementById("logoutBtn").onclick = () => {
       firebase.auth().signOut()
